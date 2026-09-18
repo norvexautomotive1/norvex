@@ -1,0 +1,136 @@
+$bg: #0a0906;
+$panel: #0d0c08;
+$ink: #f2ede3;
+$ink-dim: rgba(242, 237, 227, 0.68);
+$gold: #c8a24d;
+$gold-bright: #e2bf6f;
+$hairline: rgba(200, 162, 77, 0.25);
+
+$font-display: 'Cormorant Garamond', 'Georgia', serif;
+$font-ui: 'Jost', 'Helvetica Neue', sans-serif;
+
+.why-choose-us {
+  padding: 110px 24px;
+  background: $bg;
+  color: $ink;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: $gold;
+    font-family: $font-ui;
+    font-size: 0.72rem;
+    letter-spacing: 0.34em;
+    margin-bottom: 18px;
+
+    &::before,
+    &::after {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: $hairline;
+    }
+  }
+
+  h2 {
+    font-family: $font-display;
+    font-weight: 600;
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin: 0 0 16px;
+    text-align: center;
+  }
+
+  .intro {
+    max-width: 520px;
+    text-align: center;
+    color: $ink-dim;
+    font-family: $font-ui;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin: 0 0 64px;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    width: 100%;
+    max-width: 1180px;
+    background: $hairline;
+    border: 1px solid $hairline;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .card {
+      background: $panel;
+      padding: 40px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      transition: background 0.3s ease;
+    
+      &:hover {
+        background: #131109;
+
+        .icon-badge {
+          border-color: $gold-bright;
+          color: $gold-bright;
+        }
+      }
+
+      .icon-badge {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 1px solid $hairline;
+        display: grid;
+        place-items: center;
+        color: $gold;
+        margin-bottom: 24px;
+        transition: border-color 0.3s ease, color 0.3s ease;
+
+        svg {
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      h3 {
+        font-family: $font-display;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: $gold-bright;
+        margin: 0 0 10px;
+      }
+
+      p {
+        color: $ink-dim;
+        font-family: $font-ui;
+        font-size: 0.85rem;
+        line-height: 1.65;
+        margin: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .why-choose-us .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .why-choose-us {
+    padding: 80px 20px;
+
+    .cards {
+        margin:10px;
+      grid-template-columns: 1fr;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+$bg: #0a0906;
+$panel: #0d0c08;
+$ink: #f2ede3;
+$ink-dim: rgba(242, 237, 227, 0.68);
+$gold: #c8a24d;
+$gold-bright: #e2bf6f;
+$hairline: rgba(200, 162, 77, 0.25);
+
+$font-display: 'Cormorant Garamond', Georgia, serif;
+$font-ui: 'Jost', 'Helvetica Neue', sans-serif;
+
+.location{
+    width: 100%;
+    height: 50vh;
+    color: $gold-bright;
+    background:$bg;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: $font-ui;
+    font-size: 2rem;
+    font-weight: 600;
+}

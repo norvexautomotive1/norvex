@@ -9,14 +9,19 @@ $hairline-soft: rgba(200, 162, 77, 0.12);
 
 $font-display: 'Cormorant Garamond', 'Georgia', serif;
 $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
-
+@font-face{
+    font-family: logo;
+    src:url(../assets/logo/citadel_of_blackrose/Citadel\ of\ Blackrose.ttf)
+}
 .navbar-shell {
   width: 100%;
-  position: relative;
-  z-index: 100;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .navbar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -24,7 +29,6 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
   padding: 26px 52px;
   border-bottom: 1px solid $hairline;
   background: linear-gradient(180deg, $bg-panel 0%, $bg 100%);
-  position: relative;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
 }
 
@@ -50,6 +54,11 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
   svg {
     width: 30px;
     height: 30px;
+  }
+
+  text{
+    font-family: logo;
+    
   }
 }
 

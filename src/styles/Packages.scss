@@ -1,0 +1,246 @@
+$bg: #0a0906;
+$panel: #0d0c08;
+$ink: #f2ede3;
+$ink-dim: rgba(242, 237, 227, 0.68);
+$gold: #c8a24d;
+$gold-bright: #e2bf6f;
+$hairline: rgba(200, 162, 77, 0.25);
+
+$font-display: 'Cormorant Garamond', Georgia, serif;
+$font-ui: 'Jost', 'Helvetica Neue', sans-serif;
+
+.packages-section {
+  padding: 110px 24px;
+  background: $bg;
+  color: $ink;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: $gold;
+    font-family: $font-ui;
+    font-size: 0.72rem;
+    letter-spacing: 0.34em;
+    margin-bottom: 18px;
+
+    &::before,
+    &::after {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: $hairline;
+    }
+  }
+
+  h2 {
+    font-family: $font-display;
+    font-weight: 600;
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin: 0 0 16px;
+    text-align: center;
+  }
+
+  .intro {
+    max-width: 520px;
+    text-align: center;
+    color: $ink-dim;
+    font-family: $font-ui;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin: 0 0 48px;
+  }
+}
+
+.package-card {
+  width: 100%;
+  max-width: 560px;
+  background: linear-gradient(165deg, $panel 0%, $bg 100%);
+  border: 1px solid $hairline;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+// Tabs
+
+.tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid $hairline;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $ink-dim;
+  font-family: $font-display;
+  font-size: 1.15rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &.active {
+    color: $gold-bright;
+  }
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background: $gold;
+  transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+
+  &.pos-1 {
+    transform: translateX(100%);
+  }
+}
+
+// Slider
+
+.slider-viewport {
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.slider-track {
+  display: flex;
+  width: 200%;
+}
+
+.panel {
+  width: 50%;
+  flex-shrink: 0;
+}
+
+// Item list
+
+.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 22px 30px 28px;
+}
+
+.item-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(200, 162, 77, 0.1);
+
+  &--tight {
+    border-bottom: none;
+    padding-bottom: 2px;
+  }
+}
+
+.item-note-wrap {
+  list-style: none;
+}
+
+.item-list > li:last-child > .item-row,
+.item-list > .item-row:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  color: $ink;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.item-leader {
+  flex: 1;
+  border-bottom: 1px dotted rgba(200, 162, 77, 0.35);
+  transform: translateY(-4px);
+}
+
+.item-price {
+  color: $gold-bright;
+  font-family: $font-display;
+  font-size: 1.05rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &.quote {
+    font-family: $font-ui;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: $gold;
+    border: 1px solid $hairline;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+}
+
+.item-note {
+  display: block;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.76rem;
+  font-style: italic;
+  margin-top: -8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(200, 162, 77, 0.1);
+}
+
+.card-footer-note {
+  margin: 0 30px 26px;
+  padding: 14px 16px;
+  border: 1px solid $hairline;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.78rem;
+  line-height: 1.5;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: $gold;
+    flex-shrink: 0;
+  }
+}
+
+.swipe-hint {
+  display: none;
+  text-align: center;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  margin-top: 16px;
+}
+
+@media (max-width: 640px) {
+  .packages-section {
+    padding: 80px 18px;
+  }
+
+  .item-name {
+    white-space: normal;
+  }
+
+  .swipe-hint {
+    display: block;
+  }
+}

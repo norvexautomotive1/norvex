@@ -1,0 +1,217 @@
+$bg: #0a0906;
+$ink: #f2ede3;
+$ink-dim: rgba(242, 237, 227, 0.72);
+$gold: #c8a24d;
+$gold-bright: #e2bf6f;
+$hairline: rgba(200, 162, 77, 0.25);
+
+$font-display: 'Cormorant Garamond', Georgia, serif;
+$font-ui: 'Jost', 'Helvetica Neue', sans-serif;
+
+.hero-section {
+  position: relative;
+  padding: 0 24px 90px;
+  background: $bg;
+  overflow: hidden;
+}
+
+// Mobile full-bleed background image — hidden on desktop
+.hero-mobile-bg {
+  display: none;
+}
+
+// Image below the text (desktop layout), overlapped by .hero-content
+.hero-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 88vh;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  // Dark gradient over the photo so the text stays legible
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(10, 9, 6, 0.96) 0%,
+      rgba(10, 9, 6, 0.78) 22%,
+      rgba(10, 9, 6, 0.35) 46%,
+      rgba(10, 9, 6, 0.55) 78%,
+      $bg 100%
+    );
+  }
+}
+
+// Text block overlaps the top of the image via negative margin (desktop)
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  margin: 0 auto -180px;
+  padding-top: 110px;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: $gold;
+  font-family: $font-ui;
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  margin-bottom: 22px;
+
+  &::before,
+  &::after {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: $hairline;
+  }
+}
+
+h1 {
+  font-family: $font-display;
+  font-weight: 600;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1.08;
+  color: $ink;
+  margin: 0 0 18px;
+
+  .accent {
+    color: $gold-bright;
+    font-style: italic;
+  }
+}
+
+h2 {
+  font-family: $font-ui;
+  font-weight: 400;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  color: $gold-bright;
+  letter-spacing: 0.02em;
+  margin: 0 0 20px;
+}
+
+.lede {
+  max-width: 560px;
+  margin: 0 auto 36px;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.cta-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.cta-button {
+  background: $gold;
+  color: $bg;
+  border: none;
+  padding: 15px 34px;
+  font-family: $font-ui;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background: $gold-bright;
+    transform: translateY(-1px);
+  }
+}
+
+.cta-secondary {
+  background: transparent;
+  color: $ink;
+  border: 1px solid $hairline;
+  padding: 15px 30px;
+  font-family: $font-ui;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    border-color: $gold;
+    color: $gold-bright;
+  }
+}
+
+// ── Mobile: swap to a full-screen background image with a dark gradient,
+//    text floats centered on top of it instead of overlapping a block below.
+@media (max-width: 680px) {
+  .hero-section {
+    min-height: 100svh;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-mobile-bg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    // Dark gradient over the mobile background photo
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(10, 9, 6, 0.55) 0%,
+        rgba(10, 9, 6, 0.75) 45%,
+        rgba(10, 9, 6, 0.96) 100%
+      );
+    }
+  }
+
+  // Desktop overlap image is not used on mobile
+  .hero-image {
+    display: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    padding: 120px 20px 60px;
+    max-width: 100%;
+  }
+
+  .cta-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cta-button,
+  .cta-secondary {
+    width: 100%;
+    max-width: 280px;
+  }
+}
