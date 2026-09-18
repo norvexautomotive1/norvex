@@ -1,6 +1,7 @@
 import React from 'react'
 import { heroImage, heroImageMobile } from '../assets/assets'
 import '../styles/Hero.scss'
+import { Link } from 'react-router-dom'
 
 const Hero = () => {
   const scrollToServices = () => {
@@ -32,7 +33,9 @@ const Hero = () => {
         </p>
 
         <div className="cta-row">
-          <button type="button" className="cta-button">Rezervă acum</button>
+          <Link to="/rezerve" className="cta-button">
+            Rezervă acum
+          </Link>
           <button type="button" className="cta-secondary" onClick={scrollToServices}>
             Vezi serviciile
           </button>

@@ -52,7 +52,7 @@ const Navbar = () => {
           </span>
           <span className="brand-text">
             <span className="line1">Norvex</span>
-            <span className="line2">Automotives</span>
+            <span className="line2">Automotive</span>
           </span>
         </div>
 

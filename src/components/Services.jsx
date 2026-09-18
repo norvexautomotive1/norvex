@@ -54,7 +54,7 @@ const Services = () => {
             </div>
             <h3>{service.title}</h3>
             <p>{service.description}</p>
-            <a href="#" className="card-link">
+            <a href="/about" className="card-link">
               Află mai multe
               <ArrowIcon />
             </a>

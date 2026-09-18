@@ -5,6 +5,7 @@ import WhyChooseUs from '../components/WhyChooseUs'
 import Packages from '../components/Packages'
 import Location from '../components/Location'
 import Reviews from '../components/Reviews'
+import LastCta from '../components/LastCta'
 const Home = () => {
   return (
     <div>
@@ -14,7 +15,7 @@ const Home = () => {
       <Packages /> 
       <Reviews />
       <Location />
-      
+      <LastCta />
     </div>
   )
 }
