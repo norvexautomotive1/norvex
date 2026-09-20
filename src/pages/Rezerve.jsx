@@ -22,6 +22,8 @@ const PACHETE = {
   ],
 }
 
+const TIPURI_CAROSERIE = ['Citadină', 'Sedan', 'Break']
+
 const VulcanizareIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
     <circle cx="12" cy="12" r="8.5" />
@@ -60,7 +62,9 @@ const ErrorIcon = () => (
 const initialForm = {
   nume: '',
   prenume: '',
-  tip_masina: '',
+  telefon: '',
+  email: '',
+  tip_masina: TIPURI_CAROSERIE[0],
   numar_masina: '',
   categorie_serviciu: 'Vulcanizare',
   pachet_selectat: `${PACHETE.Vulcanizare[0].label} — ${PACHETE.Vulcanizare[0].price}`,
@@ -94,6 +98,8 @@ const Rezerve = () => {
       {
         nume: form.nume,
         prenume: form.prenume,
+        telefon: form.telefon,
+        email: form.email,
         tip_masina: form.tip_masina,
         numar_masina: form.numar_masina,
         categorie_serviciu: form.categorie_serviciu,
@@ -151,16 +157,48 @@ const Rezerve = () => {
 
           <div className="field-row">
             <div className="field">
-              <label htmlFor="tip_masina">Tip mașină</label>
+              <label htmlFor="telefon">Număr de telefon</label>
               <input
-                id="tip_masina"
-                type="text"
-                name="tip_masina"
-                placeholder="ex: BMW Seria 3"
-                value={form.tip_masina}
+                id="telefon"
+                type="tel"
+                name="telefon"
+                placeholder="07XX XXX XXX"
+                value={form.telefon}
                 onChange={handleChange}
                 required
               />
+            </div>
+            <div className="field">
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="nume@exemplu.com"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="tip_masina">Tip caroserie</label>
+              <div className="select-wrap">
+                <select
+                  id="tip_masina"
+                  name="tip_masina"
+                  value={form.tip_masina}
+                  onChange={handleChange}
+                >
+                  {TIPURI_CAROSERIE.map((tip) => (
+                    <option key={tip} value={tip}>
+                      {tip}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="field">
               <label htmlFor="numar_masina">Număr mașină</label>
@@ -225,7 +263,7 @@ const Rezerve = () => {
 
           <div className="trust-note">
             <InfoIcon />
-            Nu e nevoie de plată online — confirmăm telefonic programarea
+            Nu e nevoie de plată online — confirmăm prin email programarea!
           </div>
 
           {status === 'success' && (
