@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -6,7 +6,33 @@ import Rezerve from './pages/Rezerve'
 import Contact from './pages/Contact'
 import About from './pages/About'
 import Footer from './components/Footer'
+
 const App = () => {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const servicesSection = document.getElementById('services-section')
+      if (!servicesSection) {
+        setIsVisible(false)
+        return
+      }
+
+      const sectionTop = servicesSection.offsetTop
+      const triggerPoint = sectionTop - 220
+      setIsVisible(window.scrollY >= triggerPoint)
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll)
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <BrowserRouter>
       <div className="app-shell">
@@ -20,6 +46,17 @@ const App = () => {
             <Route path="/about" element={<About />} />
           </Routes>
         </main>
+
+        <button
+          type="button"
+          className={`back-to-top ${isVisible ? 'visible' : ''}`}
+          onClick={scrollToTop}
+          aria-label="Back to top"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14M5 12l7-7 7 7" />
+          </svg>
+        </button>
 
         <Footer />
       </div>
