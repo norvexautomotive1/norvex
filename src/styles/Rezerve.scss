@@ -1,0 +1,267 @@
+$bg: #0a0906;
+$panel: #0d0c08;
+$ink: #f2ede3;
+$ink-dim: rgba(242, 237, 227, 0.68);
+$gold: #c8a24d;
+$gold-bright: #e2bf6f;
+$hairline: rgba(200, 162, 77, 0.25);
+
+$font-display: 'Cormorant Garamond', Georgia, serif;
+$font-ui: 'Jost', 'Helvetica Neue', sans-serif;
+
+.rezerve-page {
+  padding: 100px 24px 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: $ink;
+  background: $bg;
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: $gold;
+    font-family: $font-ui;
+    font-size: 0.72rem;
+    letter-spacing: 0.34em;
+    margin-bottom: 20px;
+
+    &::before,
+    &::after {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: $hairline;
+    }
+  }
+
+  h1 {
+    font-family: $font-display;
+    font-weight: 600;
+    font-size: clamp(2.2rem, 4.4vw, 3.2rem);
+    margin: 0 0 16px;
+    text-align: center;
+  }
+
+  .intro {
+    max-width: 480px;
+    text-align: center;
+    color: $ink-dim;
+    font-family: $font-ui;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin: 0 0 56px;
+  }
+}
+
+.form-card {
+  width: 100%;
+  max-width: 620px;
+  background: linear-gradient(165deg, $panel 0%, $bg 100%);
+  border: 1px solid $hairline;
+  border-radius: 4px;
+  padding: 44px 40px;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+}
+
+.field-row {
+  display: flex;
+  gap: 18px;
+
+  .field {
+    flex: 1;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  label {
+    color: $gold;
+    font-family: $font-ui;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  input,
+  select {
+    background: #131109;
+    border: 1px solid $hairline;
+    color: $ink;
+    padding: 13px 15px;
+    font-family: $font-ui;
+    font-size: 0.9rem;
+    border-radius: 3px;
+    transition: border-color 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+
+    &:focus {
+      outline: none;
+      border-color: $gold;
+    }
+
+    &::placeholder {
+      color: rgba(242, 237, 227, 0.32);
+    }
+  }
+}
+
+.select-wrap {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 1.5px solid $gold;
+    border-bottom: 1.5px solid $gold;
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  select {
+    width: 100%;
+    padding-right: 36px;
+    cursor: pointer;
+
+    option {
+      background: #131109;
+    }
+  }
+}
+
+// Category toggle
+
+.category-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.category-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px;
+  background: #131109;
+  border: 1px solid $hairline;
+  border-radius: 3px;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &.active {
+    border-color: $gold;
+    color: $gold-bright;
+    background: rgba(200, 162, 77, 0.08);
+  }
+}
+
+// Submit
+
+.submit-button {
+  margin-top: 6px;
+  background: $gold;
+  color: $bg;
+  border: none;
+  padding: 16px;
+  font-family: $font-ui;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: $gold-bright;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.trust-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.76rem;
+  text-align: center;
+  justify-content: center;
+  margin-top: 4px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: $gold;
+    flex-shrink: 0;
+  }
+}
+
+// Status banners
+
+.status-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 3px;
+  font-family: $font-ui;
+  font-size: 0.84rem;
+  border: 1px solid $hairline;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  &.success {
+    color: $gold-bright;
+  }
+
+  &.error {
+    color: #e07a5f;
+    border-color: rgba(224, 122, 95, 0.4);
+  }
+}
+
+@media (max-width: 560px) {
+  .form-card {
+    padding: 32px 22px;
+  }
+
+  .field-row {
+    flex-direction: column;
+  }
+
+  .category-toggle {
+    grid-template-columns: 1fr;
+  }
+}
