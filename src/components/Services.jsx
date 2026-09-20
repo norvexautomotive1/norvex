@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import '../styles/Services.scss'
 
 const services = [
@@ -54,10 +55,10 @@ const Services = () => {
             </div>
             <h3>{service.title}</h3>
             <p>{service.description}</p>
-            <a href="/about" className="card-link">
+            <Link to="/about" className="card-link">
               Află mai multe
               <ArrowIcon />
-            </a>
+            </Link>
           </div>
         ))}
       </div>
