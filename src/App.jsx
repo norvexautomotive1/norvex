@@ -5,7 +5,6 @@ import Home from './pages/Home'
 import Rezerve from './pages/Rezerve'
 import Contact from './pages/Contact'
 import About from './pages/About'
-import Confirmare from './pages/Confirmare'
 import Footer from './components/Footer'
 
 const App = () => {
@@ -45,7 +44,6 @@ const App = () => {
             <Route path="/rezerve" element={<Rezerve />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
-            <Route path="/confirmare" element={<Confirmare />} />
           </Routes>
         </main>
 

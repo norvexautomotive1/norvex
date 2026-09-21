@@ -11,6 +11,34 @@ const CLASE_VEHICUL = [
   { label: 'Microbuz 8+1', field: 'pret_microbuz' },
 ]
 
+const LUNI = [
+  'Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie',
+  'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie',
+]
+const ZILE_SCURT = ['Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ', 'Du']
+const ZILE_LUNGI = ['Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă', 'Duminică']
+
+// Codul de eroare pe care îl aruncă trigger-ul din baza de date când
+// cineva a luat între timp slotul ales (vezi programari_migration.sql)
+const COD_SLOT_OCUPAT = 'NX001'
+
+/* ---------- Helpers de dată/oră ----------
+   Nu folosim toISOString(): convertește în UTC și poate muta ziua
+   cu o zi în urmă. Formatăm manual, în ora locală. */
+const pad = (n) => String(n).padStart(2, '0')
+const toISO = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
+// 1 = luni ... 7 = duminică (la fel ca în baza de date)
+const isoDow = (d) => (d.getDay() === 0 ? 7 : d.getDay())
+const fmtOra = (t) => t.slice(0, 5)
+
+const formatDataLunga = (iso) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  return `${ZILE_LUNGI[isoDow(date) - 1]}, ${d} ${LUNI[m - 1].toLowerCase()}`
+}
+
+/* ---------- Iconițe ---------- */
 const VulcanizareIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
     <circle cx="12" cy="12" r="8.5" />
@@ -46,6 +74,18 @@ const ErrorIcon = () => (
   </svg>
 )
 
+const ChevronIcon = ({ direction }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    style={{ transform: direction === 'left' ? 'rotate(180deg)' : 'none' }}
+  >
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+)
+
 // Preț afișat/trimis pentru un serviciu, în funcție de categorie și clasă
 const getPriceLabel = (service, claseField) => {
   if (!service) return ''
@@ -56,8 +96,163 @@ const getPriceLabel = (service, claseField) => {
   return value === null || value === undefined ? '—' : `${value} lei`
 }
 
+/* ---------- Calendar ----------
+   Zilele nedisponibile (trecut, închis, sărbătoare, prea departe în viitor)
+   sunt dezactivate direct aici, după programul din baza de date.
+   Zilele complet ocupate se văd după ce alegi ziua (nu mai sunt ore libere). */
+const ZiCalendar = ({ program, zileInchise, maxData, value, onChange }) => {
+  const azi = useMemo(() => startOfDay(new Date()), [])
+  const [luna, setLuna] = useState(() => new Date(azi.getFullYear(), azi.getMonth(), 1))
+
+  const primaLunaPosibila = new Date(azi.getFullYear(), azi.getMonth(), 1)
+  const ultimaLunaPosibila = new Date(maxData.getFullYear(), maxData.getMonth(), 1)
+  const poateInapoi = luna > primaLunaPosibila
+  const poateInainte = luna < ultimaLunaPosibila
+
+  const schimbaLuna = (delta) =>
+    setLuna(new Date(luna.getFullYear(), luna.getMonth() + delta, 1))
+
+  const celule = []
+  for (let i = 1; i < isoDow(luna); i++) celule.push(null)
+  const nrZile = new Date(luna.getFullYear(), luna.getMonth() + 1, 0).getDate()
+  for (let d = 1; d <= nrZile; d++) {
+    celule.push(new Date(luna.getFullYear(), luna.getMonth(), d))
+  }
+
+  return (
+    <div className="calendar">
+      <div className="cal-header">
+        <button
+          type="button"
+          className="cal-nav"
+          onClick={() => schimbaLuna(-1)}
+          disabled={!poateInapoi}
+          aria-label="Luna precedentă"
+        >
+          <ChevronIcon direction="left" />
+        </button>
+        <div className="cal-title" aria-live="polite">
+          {LUNI[luna.getMonth()]} {luna.getFullYear()}
+        </div>
+        <button
+          type="button"
+          className="cal-nav"
+          onClick={() => schimbaLuna(1)}
+          disabled={!poateInainte}
+          aria-label="Luna următoare"
+        >
+          <ChevronIcon direction="right" />
+        </button>
+      </div>
+
+      <div className="cal-weekdays" aria-hidden="true">
+        {ZILE_SCURT.map((z) => (
+          <span key={z}>{z}</span>
+        ))}
+      </div>
+
+      <div className="cal-grid">
+        {celule.map((data, i) => {
+          if (!data) return <span key={`gol-${i}`} className="cal-empty" />
+
+          const iso = toISO(data)
+          const inchisa = !program[isoDow(data)]?.deschis || zileInchise.has(iso)
+          const dezactivata = data < azi || data > maxData || inchisa
+          const selectata = iso === value
+          const esteAzi = data.getTime() === azi.getTime()
+
+          return (
+            <button
+              key={iso}
+              type="button"
+              className={`cal-day${selectata ? ' selected' : ''}${esteAzi ? ' today' : ''}`}
+              disabled={dezactivata}
+              aria-pressed={selectata}
+              aria-label={formatDataLunga(iso)}
+              title={
+                zileInchise.get(iso) || (inchisa && data >= azi ? 'Închis' : undefined)
+              }
+              onClick={() => onChange(iso)}
+            >
+              {data.getDate()}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/* ---------- Selector de ore ---------- */
+const SelectorOra = ({ data, sloturi, loading, error, value, onChange, onRetry }) => {
+  if (!data) {
+    return <p className="slots-hint">Alege o zi ca să vezi orele libere.</p>
+  }
+
+  if (loading) {
+    return (
+      <div className="slots-grid" aria-busy="true" aria-label="Se încarcă orele">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <span key={i} className="slot skeleton" />
+        ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <p className="slots-hint error">
+        {error}{' '}
+        <button type="button" className="link-btn" onClick={onRetry}>
+          Reîncearcă
+        </button>
+      </p>
+    )
+  }
+
+  if (sloturi.every((s) => s.locuri_libere === 0)) {
+    return (
+      <p className="slots-hint">
+        Nu mai sunt ore libere în ziua aleasă. Încearcă altă zi.
+      </p>
+    )
+  }
+
+  const grupuri = [
+    { titlu: 'Dimineața', items: sloturi.filter((s) => s.slot < '12:00:00') },
+    { titlu: 'După-amiaza', items: sloturi.filter((s) => s.slot >= '12:00:00') },
+  ].filter((g) => g.items.length > 0)
+
+  return (
+    <div className="slots" key={data}>
+      {grupuri.map((grup) => (
+        <div key={grup.titlu} className="slots-group">
+          {grupuri.length > 1 && <div className="slots-group-title">{grup.titlu}</div>}
+          <div className="slots-grid">
+            {grup.items.map((s) => (
+              <button
+                key={s.slot}
+                type="button"
+                className={`slot${s.slot === value ? ' selected' : ''}`}
+                disabled={s.locuri_libere === 0}
+                aria-pressed={s.slot === value}
+                onClick={() => onChange(s.slot)}
+              >
+                {fmtOra(s.slot)}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const Rezerve = () => {
   const [services, setServices] = useState([])
+  const [program, setProgram] = useState({}) // { 1: {deschis, ora_start, ora_end}, ... 7: ... }
+  const [zileInchise, setZileInchise] = useState(new Map()) // 'YYYY-MM-DD' -> motiv
+  const [capacitate, setCapacitate] = useState({}) // { Vulcanizare: {zile_maxim, ...} }
   const [loadingServices, setLoadingServices] = useState(true)
   const [loadError, setLoadError] = useState('')
 
@@ -70,31 +265,54 @@ const Rezerve = () => {
   const [categorieServiciu, setCategorieServiciu] = useState('Vulcanizare')
   const [pachetId, setPachetId] = useState('')
 
+  const [dataProgramare, setDataProgramare] = useState('') // 'YYYY-MM-DD'
+  const [oraProgramare, setOraProgramare] = useState('') // 'HH:MM:SS'
+  const [sloturi, setSloturi] = useState([])
+  const [loadingSloturi, setLoadingSloturi] = useState(false)
+  const [slotError, setSlotError] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
+
   const [status, setStatus] = useState('idle') // idle | loading | success | error
   const [errorMessage, setErrorMessage] = useState('')
+  const [successText, setSuccessText] = useState('')
 
+  // Servicii + program + zile închise + capacitate, într-un singur val
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchAll = async () => {
       setLoadingServices(true)
       setLoadError('')
 
-      const { data, error } = await supabase
-        .from('servicii_norvex')
-        .select('*')
-        .order('ordine', { ascending: true })
-        .order('created_at', { ascending: true })
+      const [servicesRes, programRes, inchiseRes, capRes] = await Promise.all([
+        supabase
+          .from('servicii_norvex')
+          .select('*')
+          .order('ordine', { ascending: true })
+          .order('created_at', { ascending: true }),
+        supabase.from('program_norvex').select('*'),
+        supabase
+          .from('zile_inchise_norvex')
+          .select('data, motiv')
+          .gte('data', toISO(new Date())),
+        supabase.from('capacitate_norvex').select('*'),
+      ])
 
-      if (error) {
-        setLoadError(error.message)
+      const firstError =
+        servicesRes.error || programRes.error || inchiseRes.error || capRes.error
+
+      if (firstError) {
+        setLoadError(firstError.message)
         setLoadingServices(false)
         return
       }
 
-      setServices(data)
+      setServices(servicesRes.data)
+      setProgram(Object.fromEntries(programRes.data.map((p) => [p.zi_saptamana, p])))
+      setZileInchise(new Map(inchiseRes.data.map((z) => [z.data, z.motiv])))
+      setCapacitate(Object.fromEntries(capRes.data.map((c) => [c.categorie, c])))
       setLoadingServices(false)
     }
 
-    fetchServices()
+    fetchAll()
   }, [])
 
   const pacheteDisponibile = useMemo(
@@ -113,9 +331,61 @@ const Rezerve = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categorieServiciu, services])
 
+  // Orele libere pentru ziua + categoria aleasă. Se reîncarcă la orice
+  // schimbare și după o rezervare/eroare (refreshKey). Orice ora aleasă
+  // se resetează, pentru că sloturile diferă între categorii.
+  useEffect(() => {
+    setOraProgramare('')
+
+    if (!dataProgramare) {
+      setSloturi([])
+      setSlotError('')
+      return undefined
+    }
+
+    let cancelled = false
+
+    const loadSloturi = async () => {
+      setLoadingSloturi(true)
+      setSlotError('')
+
+      const { data, error } = await supabase.rpc('get_sloturi_libere', {
+        p_categorie: categorieServiciu,
+        p_data: dataProgramare,
+      })
+
+      if (cancelled) return // răspuns vechi, utilizatorul a schimbat între timp ziua
+
+      if (error) {
+        setSloturi([])
+        setSlotError('Nu am putut încărca orele.')
+      } else {
+        setSloturi(data ?? [])
+      }
+      setLoadingSloturi(false)
+    }
+
+    loadSloturi()
+
+    return () => {
+      cancelled = true
+    }
+  }, [dataProgramare, categorieServiciu, refreshKey])
+
+  const maxZile = capacitate[categorieServiciu]?.zile_maxim ?? 60
+  const maxData = useMemo(() => {
+    const d = startOfDay(new Date())
+    d.setDate(d.getDate() + maxZile)
+    return d
+  }, [maxZile])
+
   const claseField = CLASE_VEHICUL.find((c) => c.label === claseVehicul)?.field
   const pachetSelectat = pacheteDisponibile.find((p) => p.id === pachetId)
   const pretAfisat = getPriceLabel(pachetSelectat, claseField)
+
+  const programareText = dataProgramare
+    ? `${formatDataLunga(dataProgramare)}${oraProgramare ? `, ora ${fmtOra(oraProgramare)}` : ''}`
+    : ''
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -123,6 +393,12 @@ const Rezerve = () => {
     if (!pachetSelectat) {
       setStatus('error')
       setErrorMessage('Selectează un pachet valid.')
+      return
+    }
+
+    if (!dataProgramare || !oraProgramare) {
+      setStatus('error')
+      setErrorMessage('Alege data și ora programării.')
       return
     }
 
@@ -143,6 +419,8 @@ const Rezerve = () => {
           numar_masina: numarMasina,
           categorie_serviciu: categorieServiciu,
           pachet_selectat: pachetText,
+          data_programare: dataProgramare,
+          ora_programare: oraProgramare,
         },
       ])
       .select('id')
@@ -151,6 +429,8 @@ const Rezerve = () => {
     if (error) {
       setStatus('error')
       setErrorMessage(error.message)
+      // Slotul a fost luat de altcineva între timp: arată orele reale
+      if (error.code === COD_SLOT_OCUPAT) setRefreshKey((k) => k + 1)
       return
     }
 
@@ -164,12 +444,15 @@ const Rezerve = () => {
     if (confirmationError) {
       setStatus('error')
       setErrorMessage(
-        'Rezervarea a fost salvată, dar emailul de confirmare nu a putut fi pregătit.'
+        'Rezervarea a fost salvată, dar emailul cu detaliile nu a putut fi trimis.'
       )
+      // Slotul e deja luat; reîncarcă orele ca să nu se poată rezerva a doua oară
+      setRefreshKey((k) => k + 1)
       return
     }
 
     setStatus('success')
+    setSuccessText(programareText)
     setNume('')
     setPrenume('')
     setTelefon('')
@@ -177,6 +460,8 @@ const Rezerve = () => {
     setNumarMasina('')
     setClaseVehicul(CLASE_VEHICUL[0].label)
     setCategorieServiciu('Vulcanizare')
+    setDataProgramare('')
+    setOraProgramare('')
   }
 
   return (
@@ -184,8 +469,8 @@ const Rezerve = () => {
       <div className="eyebrow">Programare</div>
       <h1>Rezervă acum</h1>
       <p className="intro">
-        Completează formularul și te contactăm în cel mai scurt timp pentru
-        confirmarea programării.
+        Alege ziua și ora care ți se potrivesc. Rezervarea este înregistrată pe
+        loc, iar detaliile ajung pe email.
       </p>
 
       <div className="form-card">
@@ -319,29 +604,67 @@ const Rezerve = () => {
               </div>
             </div>
 
-            {pachetSelectat && (
-              <div className="price-preview">
-                Preț selectat: <b>{pretAfisat}</b>
+            <div className="field" role="group" aria-labelledby="lbl-programare">
+              <label id="lbl-programare">Data și ora programării</label>
+              <div className="scheduler">
+                <ZiCalendar
+                  program={program}
+                  zileInchise={zileInchise}
+                  maxData={maxData}
+                  value={dataProgramare}
+                  onChange={setDataProgramare}
+                />
+                <div className="scheduler-slots">
+                  <SelectorOra
+                    data={dataProgramare}
+                    sloturi={sloturi}
+                    loading={loadingSloturi}
+                    error={slotError}
+                    value={oraProgramare}
+                    onChange={setOraProgramare}
+                    onRetry={() => setRefreshKey((k) => k + 1)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {(pachetSelectat || dataProgramare) && (
+              <div className="booking-summary">
+                {pachetSelectat && (
+                  <div className="summary-row">
+                    <span>Preț selectat</span>
+                    <b>{pretAfisat}</b>
+                  </div>
+                )}
+                {dataProgramare && (
+                  <div className="summary-row">
+                    <span>Programare</span>
+                    <b>{programareText}</b>
+                  </div>
+                )}
               </div>
             )}
 
             <button
               type="submit"
               className="submit-button"
-              disabled={status === 'loading' || !pachetSelectat}
+              disabled={
+                status === 'loading' || !pachetSelectat || !dataProgramare || !oraProgramare
+              }
             >
               {status === 'loading' ? 'Se trimite...' : 'Trimite rezervarea'}
             </button>
 
             <div className="trust-note">
               <InfoIcon />
-              Nu e nevoie de plată online — confirmăm prin email programarea!
+              Nu e nevoie de plată online. Te așteptăm la service la ora rezervată!
             </div>
 
             {status === 'success' && (
               <div className="status-banner success">
                 <CheckIcon />
-                Rezervarea a fost trimisă. Te contactăm în curând!
+                Rezervarea ta este înregistrată pentru {successText}. Ți-am trimis un
+                email cu detaliile.
               </div>
             )}
 
@@ -358,4 +681,4 @@ const Rezerve = () => {
   )
 }
 
-export default Rezerve
+export default Rezerve  

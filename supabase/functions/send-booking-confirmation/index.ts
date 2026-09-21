@@ -7,8 +7,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const CONFIRMATION_URL =
-  "https://norvexauto.netlify.app/confirmare?token=";
 const RESEND_FROM = "Norvex Automotive <onboarding@resend.dev>";
 
 const jsonResponse = (status: number, body: Record<string, unknown>) =>
@@ -31,9 +29,20 @@ const escapeHtml = (value: unknown) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
-const buildEmailHtml = (reservation: Record<string, unknown>, confirmationLink: string) => {
-  const prenume = escapeHtml(reservation.prenume);
-  const confirmationUrl = escapeHtml(confirmationLink);
+const formatDate = (value: unknown) => {
+  if (typeof value !== "string" || !value) return "data stabilită";
+  const [year, month, day] = value.slice(0, 10).split("-");
+  if (!year || !month || !day) return value;
+  return `${day}.${month}.${year}`;
+};
+
+const formatTime = (value: unknown) =>
+  typeof value === "string" && value ? value.slice(0, 5) : "ora stabilită";
+
+const buildEmailHtml = (reservation: Record<string, unknown>) => {
+  const firstName = escapeHtml(reservation.prenume);
+  const appointmentDate = escapeHtml(formatDate(reservation.data_programare));
+  const appointmentTime = escapeHtml(formatTime(reservation.ora_programare));
   const details = [
     ["Nume", `${reservation.prenume ?? ""} ${reservation.nume ?? ""}`],
     ["Telefon", reservation.telefon],
@@ -41,14 +50,20 @@ const buildEmailHtml = (reservation: Record<string, unknown>, confirmationLink: 
     ["Număr mașină", reservation.numar_masina],
     ["Categorie", reservation.categorie_serviciu],
     ["Pachet", reservation.pachet_selectat],
+    ["Data", formatDate(reservation.data_programare)],
+    ["Ora", formatTime(reservation.ora_programare)],
   ];
 
   const detailRows = details
     .map(
       ([label, value]) => `
         <tr>
-          <td style="padding:10px 0;color:#b9b1a4;font-size:13px;width:38%;">${escapeHtml(label)}</td>
-          <td style="padding:10px 0;color:#f2ede3;font-size:13px;font-weight:600;">${escapeHtml(value)}</td>
+          <td style="padding:10px 0;color:#b9b1a4;font-size:13px;width:38%;">
+            ${escapeHtml(label)}
+          </td>
+          <td style="padding:10px 0;color:#f2ede3;font-size:13px;font-weight:600;">
+            ${escapeHtml(value)}
+          </td>
         </tr>`,
     )
     .join("");
@@ -60,32 +75,25 @@ const buildEmailHtml = (reservation: Record<string, unknown>, confirmationLink: 
         <div style="padding:32px 16px;background:#090806;">
           <div style="max-width:600px;margin:0 auto;background:#11100c;border:1px solid #4b3b1c;">
             <div style="padding:30px 32px;border-bottom:1px solid #4b3b1c;">
-              <div style="color:#d2ad59;font-size:12px;letter-spacing:4px;text-transform:uppercase;">NORVEX AUTOMOTIVE</div>
-              <h1 style="margin:22px 0 0;color:#f2ede3;font-size:28px;font-weight:600;">Confirmă rezervarea</h1>
+              <div style="color:#d2ad59;font-size:12px;letter-spacing:4px;text-transform:uppercase;">
+                NORVEX AUTOMOTIVE
+              </div>
+              <h1 style="margin:22px 0 0;color:#f2ede3;font-size:28px;font-weight:600;">
+                Rezervarea ta a fost acceptată
+              </h1>
             </div>
             <div style="padding:32px;">
-              <p style="margin:0 0 16px;color:#f2ede3;font-size:16px;">Salut, ${prenume}!</p>
+              <p style="margin:0 0 16px;color:#f2ede3;font-size:16px;">
+                Salut, ${firstName}!
+              </p>
               <p style="margin:0 0 20px;color:#c4bdb1;font-size:15px;line-height:1.7;">
-                Am primit solicitarea ta de programare la Norvex Automotive.
-                Pentru a finaliza rezervarea, confirmă solicitarea apăsând butonul de mai jos.
+                Rezervarea ta la Norvex Automotive a fost acceptată.
+                Te așteptăm pe <strong style="color:#f2ede3;">${appointmentDate}</strong>,
+                la ora <strong style="color:#f2ede3;">${appointmentTime}</strong>.
               </p>
               <table role="presentation" style="width:100%;border-collapse:collapse;margin:20px 0 28px;border-top:1px solid #3b301b;border-bottom:1px solid #3b301b;">
                 ${detailRows}
               </table>
-              <div style="text-align:center;margin:30px 0;">
-                <a href="${confirmationUrl}" style="display:inline-block;background:#d2ad59;color:#090806;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:1px;padding:15px 24px;">
-                  CONFIRMĂ REZERVAREA
-                </a>
-              </div>
-              <p style="margin:0 0 10px;color:#c4bdb1;font-size:13px;line-height:1.6;">
-                Linkul de confirmare este valabil timp de 24 de ore.
-              </p>
-              <p style="margin:0 0 8px;color:#c4bdb1;font-size:13px;line-height:1.6;">
-                Dacă butonul nu funcționează, copiază acest link în browser:
-              </p>
-              <p style="margin:0 0 24px;word-break:break-all;font-size:12px;line-height:1.6;">
-                <a href="${confirmationUrl}" style="color:#d2ad59;">${confirmationUrl}</a>
-              </p>
               <p style="margin:0;color:#81796d;font-size:12px;line-height:1.6;">
                 Dacă nu ai făcut această rezervare, poți ignora acest email.
               </p>
@@ -138,7 +146,7 @@ Deno.serve(async (request) => {
   const { data: reservation, error: reservationError } = await supabaseAdmin
     .from("rezervari_norvex")
     .select(
-      "id, created_at, nume, prenume, tip_masina, numar_masina, categorie_serviciu, pachet_selectat, status, email, telefon, confirmation_token, confirmation_expires_at, confirmation_sent_at"
+      "id, nume, prenume, tip_masina, numar_masina, categorie_serviciu, pachet_selectat, email, telefon, data_programare, ora_programare, confirmation_sent_at"
     )
     .eq("id", reservationId)
     .maybeSingle();
@@ -152,77 +160,43 @@ Deno.serve(async (request) => {
     return jsonResponse(404, { error: "Reservation not found" });
   }
 
-  console.log(`Reservation ${reservation.id}: processing confirmation email`);
+  console.log(`Reservation ${reservation.id}: processing acceptance email`);
 
   if (reservation.confirmation_sent_at) {
-    console.log(`Reservation ${reservation.id}: confirmation email already sent`);
+    console.log(`Reservation ${reservation.id}: acceptance email already sent`);
     return jsonResponse(200, {
       ok: true,
       alreadySent: true,
-      emailAlreadySent: true,
     });
   }
 
-  const email = typeof reservation.email === "string"
-    ? reservation.email.trim()
-    : "";
+  const email =
+    typeof reservation.email === "string" ? reservation.email.trim() : "";
 
   if (!email || !isValidEmail(email)) {
     return jsonResponse(400, { error: "Reservation email is invalid" });
   }
 
-  const confirmationToken =
-    typeof reservation.confirmation_token === "string" &&
-      reservation.confirmation_token
-      ? reservation.confirmation_token
-      : crypto.randomUUID();
-  const confirmationExpiresAt =
-    typeof reservation.confirmation_expires_at === "string" &&
-      reservation.confirmation_expires_at
-      ? reservation.confirmation_expires_at
-      : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-  if (
-    confirmationToken !== reservation.confirmation_token ||
-    confirmationExpiresAt !== reservation.confirmation_expires_at
-  ) {
-    const { error: tokenUpdateError } = await supabaseAdmin
-      .from("rezervari_norvex")
-      .update({
-        confirmation_token: confirmationToken,
-        confirmation_expires_at: confirmationExpiresAt,
-      })
-      .eq("id", reservation.id);
-
-    if (tokenUpdateError) {
-      console.error("Confirmation token update error:", tokenUpdateError);
-      return jsonResponse(500, {
-        error: "Could not prepare confirmation token",
-      });
-    }
-  }
-
-  const confirmationLink =
-    `${CONFIRMATION_URL}${encodeURIComponent(confirmationToken)}`;
-  const emailHtml = buildEmailHtml(reservation, confirmationLink);
   const resend = new Resend(resendApiKey);
+  const emailHtml = buildEmailHtml(reservation);
 
-  console.log(`Reservation ${reservation.id}: sending confirmation email`);
+  console.log(`Reservation ${reservation.id}: sending acceptance email`);
   const { data, error } = await resend.emails.send({
     from: RESEND_FROM,
     to: [email],
-    subject: "Confirmă rezervarea ta la Norvex Automotive",
+    subject: "Rezervarea ta la Norvex Automotive a fost acceptată",
     html: emailHtml,
   });
 
   if (error) {
     console.error("Resend error:", error);
-    return jsonResponse(502, { error: "Confirmation email failed" });
+    return jsonResponse(502, { error: "Acceptance email failed" });
   }
 
-  console.log(`Reservation ${reservation.id}: Resend email accepted`, data
-    ? { emailId: data.id }
-    : undefined);
+  console.log(
+    `Reservation ${reservation.id}: Resend email accepted`,
+    data ? { emailId: data.id } : undefined,
+  );
 
   const { error: sentAtError } = await supabaseAdmin
     .from("rezervari_norvex")
@@ -233,13 +207,13 @@ Deno.serve(async (request) => {
   if (sentAtError) {
     console.error("confirmation_sent_at update error:", sentAtError);
     return jsonResponse(500, {
-      error: "Event accepted but reservation status could not be updated",
+      error: "Email accepted but reservation could not be updated",
     });
   }
 
   return jsonResponse(200, {
     ok: true,
-    emailAlreadySent: false,
+    alreadySent: false,
     emailId: data?.id ?? null,
   });
 });
