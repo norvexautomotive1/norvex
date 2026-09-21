@@ -1,28 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import '../styles/Rezerve.scss'
 
-const PACHETE = {
-  Vulcanizare: [
-    { label: 'Montaj / demontat roată', price: '20 lei' },
-    { label: 'Montaj / demontat anvelopă', price: '25 lei' },
-    { label: 'Echilibrat roată', price: '25 lei' },
-    { label: 'Pană / reparație anvelopă', price: '35 lei' },
-    { label: 'Valvă', price: '15 lei' },
-    { label: 'Schimb 4 roți + echilibrat', price: '105 lei' },
-    { label: 'Schimb anvelope + echilibrat', price: '165 lei' },
-  ],
-  Detailing: [
-    { label: 'Interior simplu', price: '250 lei' },
-    { label: 'Șamponare tapițerie', price: '350 lei' },
-    { label: 'Interior complet', price: '500 lei' },
-    { label: 'Polisare faruri', price: '250 lei' },
-    { label: 'Polish caroserie', price: 'pe deviz' },
-    { label: 'Pachet complet', price: '990 lei' },
-  ],
-}
-
-const TIPURI_CAROSERIE = ['Citadină', 'Sedan', 'Break']
+// Clasele astea trebuie să corespundă exact coloanelor de preț din
+// servicii_norvex (pret_autoturism / pret_suv / pret_microbuz), pentru
+// că de ele depinde ce preț se afișează la Vulcanizare.
+const CLASE_VEHICUL = [
+  { label: 'Autoturism', field: 'pret_autoturism' },
+  { label: 'SUV', field: 'pret_suv' },
+  { label: 'Microbuz 8+1', field: 'pret_microbuz' },
+]
 
 const VulcanizareIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
@@ -59,51 +46,101 @@ const ErrorIcon = () => (
   </svg>
 )
 
-const initialForm = {
-  nume: '',
-  prenume: '',
-  telefon: '',
-  email: '',
-  tip_masina: TIPURI_CAROSERIE[0],
-  numar_masina: '',
-  categorie_serviciu: 'Vulcanizare',
-  pachet_selectat: `${PACHETE.Vulcanizare[0].label} — ${PACHETE.Vulcanizare[0].price}`,
+// Preț afișat/trimis pentru un serviciu, în funcție de categorie și clasă
+const getPriceLabel = (service, claseField) => {
+  if (!service) return ''
+  if (service.categorie === 'Detailing') {
+    return service.pe_deviz ? 'pe deviz' : `${service.pret_fix} lei`
+  }
+  const value = service[claseField]
+  return value === null || value === undefined ? '—' : `${value} lei`
 }
 
 const Rezerve = () => {
-  const [form, setForm] = useState(initialForm)
+  const [services, setServices] = useState([])
+  const [loadingServices, setLoadingServices] = useState(true)
+  const [loadError, setLoadError] = useState('')
+
+  const [nume, setNume] = useState('')
+  const [prenume, setPrenume] = useState('')
+  const [telefon, setTelefon] = useState('')
+  const [email, setEmail] = useState('')
+  const [numarMasina, setNumarMasina] = useState('')
+  const [claseVehicul, setClaseVehicul] = useState(CLASE_VEHICUL[0].label)
+  const [categorieServiciu, setCategorieServiciu] = useState('Vulcanizare')
+  const [pachetId, setPachetId] = useState('')
+
   const [status, setStatus] = useState('idle') // idle | loading | success | error
   const [errorMessage, setErrorMessage] = useState('')
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
-  }
+  useEffect(() => {
+    const fetchServices = async () => {
+      setLoadingServices(true)
+      setLoadError('')
 
-  const selectCategory = (categorie) => {
-    const firstPachet = PACHETE[categorie][0]
-    setForm((prev) => ({
-      ...prev,
-      categorie_serviciu: categorie,
-      pachet_selectat: `${firstPachet.label} — ${firstPachet.price}`,
-    }))
-  }
+      const { data, error } = await supabase
+        .from('servicii_norvex')
+        .select('*')
+        .order('ordine', { ascending: true })
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        setLoadError(error.message)
+        setLoadingServices(false)
+        return
+      }
+
+      setServices(data)
+      setLoadingServices(false)
+    }
+
+    fetchServices()
+  }, [])
+
+  const pacheteDisponibile = useMemo(
+    () => services.filter((s) => s.categorie === categorieServiciu),
+    [services, categorieServiciu]
+  )
+
+  // Când se schimbă categoria (sau se încarcă serviciile), selectează
+  // automat primul pachet disponibil din noua categorie.
+  useEffect(() => {
+    if (pacheteDisponibile.length > 0) {
+      setPachetId(pacheteDisponibile[0].id)
+    } else {
+      setPachetId('')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categorieServiciu, services])
+
+  const claseField = CLASE_VEHICUL.find((c) => c.label === claseVehicul)?.field
+  const pachetSelectat = pacheteDisponibile.find((p) => p.id === pachetId)
+  const pretAfisat = getPriceLabel(pachetSelectat, claseField)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    if (!pachetSelectat) {
+      setStatus('error')
+      setErrorMessage('Selectează un pachet valid.')
+      return
+    }
+
     setStatus('loading')
     setErrorMessage('')
 
+    const pachetText = `${pachetSelectat.nume_serviciu} — ${pretAfisat}`
+
     const { error } = await supabase.from('rezervari_norvex').insert([
       {
-        nume: form.nume,
-        prenume: form.prenume,
-        telefon: form.telefon,
-        email: form.email,
-        tip_masina: form.tip_masina,
-        numar_masina: form.numar_masina,
-        categorie_serviciu: form.categorie_serviciu,
-        pachet_selectat: form.pachet_selectat,
+        nume,
+        prenume,
+        telefon,
+        email,
+        tip_masina: claseVehicul,
+        numar_masina: numarMasina,
+        categorie_serviciu: categorieServiciu,
+        pachet_selectat: pachetText,
       },
     ])
 
@@ -114,7 +151,13 @@ const Rezerve = () => {
     }
 
     setStatus('success')
-    setForm(initialForm)
+    setNume('')
+    setPrenume('')
+    setTelefon('')
+    setEmail('')
+    setNumarMasina('')
+    setClaseVehicul(CLASE_VEHICUL[0].label)
+    setCategorieServiciu('Vulcanizare')
   }
 
   return (
@@ -127,159 +170,170 @@ const Rezerve = () => {
       </p>
 
       <div className="form-card">
-        <form onSubmit={handleSubmit}>
-          <div className="field-row">
-            <div className="field">
-              <label htmlFor="nume">Nume</label>
-              <input
-                id="nume"
-                type="text"
-                name="nume"
-                placeholder="Popescu"
-                value={form.nume}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="prenume">Prenume</label>
-              <input
-                id="prenume"
-                type="text"
-                name="prenume"
-                placeholder="Andrei"
-                value={form.prenume}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
+        {loadingServices && <div className="state-message">Se încarcă serviciile...</div>}
+        {!loadingServices && loadError && (
+          <div className="state-message error">Nu am putut încărca lista de servicii.</div>
+        )}
 
-          <div className="field-row">
-            <div className="field">
-              <label htmlFor="telefon">Număr de telefon</label>
-              <input
-                id="telefon"
-                type="tel"
-                name="telefon"
-                placeholder="07XX XXX XXX"
-                value={form.telefon}
-                onChange={handleChange}
-                required
-              />
+        {!loadingServices && !loadError && (
+          <form onSubmit={handleSubmit}>
+            <div className="field-row">
+              <div className="field">
+                <label htmlFor="nume">Nume</label>
+                <input
+                  id="nume"
+                  type="text"
+                  placeholder="Popescu"
+                  value={nume}
+                  onChange={(e) => setNume(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="prenume">Prenume</label>
+                <input
+                  id="prenume"
+                  type="text"
+                  placeholder="Andrei"
+                  value={prenume}
+                  onChange={(e) => setPrenume(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-            <div className="field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="nume@exemplu.com"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
 
-          <div className="field-row">
+            <div className="field-row">
+              <div className="field">
+                <label htmlFor="telefon">Număr de telefon</label>
+                <input
+                  id="telefon"
+                  type="tel"
+                  placeholder="07XX XXX XXX"
+                  value={telefon}
+                  onChange={(e) => setTelefon(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="nume@exemplu.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="field-row">
+              <div className="field">
+                <label htmlFor="clasa_vehicul">Clasă vehicul</label>
+                <div className="select-wrap">
+                  <select
+                    id="clasa_vehicul"
+                    value={claseVehicul}
+                    onChange={(e) => setClaseVehicul(e.target.value)}
+                  >
+                    {CLASE_VEHICUL.map((clasa) => (
+                      <option key={clasa.label} value={clasa.label}>
+                        {clasa.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="field">
+                <label htmlFor="numar_masina">Număr mașină</label>
+                <input
+                  id="numar_masina"
+                  type="text"
+                  placeholder="ex: PH 12 ABC"
+                  value={numarMasina}
+                  onChange={(e) => setNumarMasina(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
             <div className="field">
-              <label htmlFor="tip_masina">Tip caroserie</label>
+              <label>Categorie serviciu</label>
+              <div className="category-toggle">
+                <button
+                  type="button"
+                  className={`category-btn ${categorieServiciu === 'Vulcanizare' ? 'active' : ''}`}
+                  onClick={() => setCategorieServiciu('Vulcanizare')}
+                >
+                  <VulcanizareIcon />
+                  Vulcanizare
+                </button>
+                <button
+                  type="button"
+                  className={`category-btn ${categorieServiciu === 'Detailing' ? 'active' : ''}`}
+                  onClick={() => setCategorieServiciu('Detailing')}
+                >
+                  <DetailingIcon />
+                  Detailing
+                </button>
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="pachet_selectat">Pachet</label>
               <div className="select-wrap">
                 <select
-                  id="tip_masina"
-                  name="tip_masina"
-                  value={form.tip_masina}
-                  onChange={handleChange}
+                  id="pachet_selectat"
+                  value={pachetId}
+                  onChange={(e) => setPachetId(e.target.value)}
+                  disabled={pacheteDisponibile.length === 0}
                 >
-                  {TIPURI_CAROSERIE.map((tip) => (
-                    <option key={tip} value={tip}>
-                      {tip}
+                  {pacheteDisponibile.length === 0 && (
+                    <option value="">Niciun pachet disponibil</option>
+                  )}
+                  {pacheteDisponibile.map((pachet) => (
+                    <option key={pachet.id} value={pachet.id}>
+                      {pachet.nume_serviciu}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
-            <div className="field">
-              <label htmlFor="numar_masina">Număr mașină</label>
-              <input
-                id="numar_masina"
-                type="text"
-                name="numar_masina"
-                placeholder="ex: PH 12 ABC"
-                value={form.numar_masina}
-                onChange={handleChange}
-                required
-              />
+
+            {pachetSelectat && (
+              <div className="price-preview">
+                Preț selectat: <b>{pretAfisat}</b>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={status === 'loading' || !pachetSelectat}
+            >
+              {status === 'loading' ? 'Se trimite...' : 'Trimite rezervarea'}
+            </button>
+
+            <div className="trust-note">
+              <InfoIcon />
+              Nu e nevoie de plată online — confirmăm prin email programarea!
             </div>
-          </div>
 
-          <div className="field">
-            <label>Categorie serviciu</label>
-            <div className="category-toggle">
-              <button
-                type="button"
-                className={`category-btn ${form.categorie_serviciu === 'Vulcanizare' ? 'active' : ''}`}
-                onClick={() => selectCategory('Vulcanizare')}
-              >
-                <VulcanizareIcon />
-                Vulcanizare
-              </button>
-              <button
-                type="button"
-                className={`category-btn ${form.categorie_serviciu === 'Detailing' ? 'active' : ''}`}
-                onClick={() => selectCategory('Detailing')}
-              >
-                <DetailingIcon />
-                Detailing
-              </button>
-            </div>
-          </div>
+            {status === 'success' && (
+              <div className="status-banner success">
+                <CheckIcon />
+                Rezervarea a fost trimisă. Te contactăm în curând!
+              </div>
+            )}
 
-          <div className="field">
-            <label htmlFor="pachet_selectat">Pachet</label>
-            <div className="select-wrap">
-              <select
-                id="pachet_selectat"
-                name="pachet_selectat"
-                value={form.pachet_selectat}
-                onChange={handleChange}
-              >
-                {PACHETE[form.categorie_serviciu].map((pachet) => {
-                  const value = `${pachet.label} — ${pachet.price}`
-                  return (
-                    <option key={pachet.label} value={value}>
-                      {value}
-                    </option>
-                  )
-                })}
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" className="submit-button" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Se trimite...' : 'Trimite rezervarea'}
-          </button>
-
-          <div className="trust-note">
-            <InfoIcon />
-            Nu e nevoie de plată online — confirmăm prin email programarea!
-          </div>
-
-          {status === 'success' && (
-            <div className="status-banner success">
-              <CheckIcon />
-              Rezervarea a fost trimisă. Te contactăm în curând!
-            </div>
-          )}
-
-          {status === 'error' && (
-            <div className="status-banner error">
-              <ErrorIcon />
-              A apărut o eroare: {errorMessage}
-            </div>
-          )}
-        </form>
+            {status === 'error' && (
+              <div className="status-banner error">
+                <ErrorIcon />
+                A apărut o eroare: {errorMessage}
+              </div>
+            )}
+          </form>
+        )}
       </div>
     </section>
   )

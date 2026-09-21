@@ -70,6 +70,18 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
   }
 }
 
+.state-message {
+  text-align: center;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.88rem;
+  padding: 20px 0;
+
+  &.error {
+    color: #e07a5f;
+  }
+}
+
 .field-row {
   display: flex;
   gap: 18px;
@@ -108,6 +120,11 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
     &:focus {
       outline: none;
       border-color: $gold;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     &::placeholder {
@@ -175,6 +192,24 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
     border-color: $gold;
     color: $gold-bright;
     background: rgba(200, 162, 77, 0.08);
+  }
+}
+
+// Live price preview
+
+.price-preview {
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.84rem;
+  padding: 12px 15px;
+  border: 1px solid $hairline;
+  border-radius: 3px;
+  background: #131109;
+
+  b {
+    color: $gold-bright;
+    font-family: $font-display;
+    font-size: 1rem;
   }
 }
 

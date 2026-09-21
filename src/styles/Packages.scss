@@ -129,12 +129,59 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
   flex-shrink: 0;
 }
 
-// Item list
+// Vulcanizare — pricing table (3 tiers)
+
+.price-table-wrap {
+  padding: 22px 16px 10px;
+  overflow-x: auto;
+}
+
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: $font-ui;
+
+  th {
+    text-align: left;
+    padding: 8px 10px 12px;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: $gold;
+    text-transform: uppercase;
+    border-bottom: 1px solid $hairline;
+    white-space: nowrap;
+
+    &:not(:first-child) {
+      text-align: right;
+    }
+  }
+
+  td {
+    padding: 12px 10px;
+    font-size: 0.84rem;
+    color: $ink;
+    border-bottom: 1px solid rgba(200, 162, 77, 0.1);
+    white-space: nowrap;
+
+    &:not(:first-child) {
+      text-align: right;
+      color: $gold-bright;
+      font-family: $font-display;
+      font-weight: 600;
+    }
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// Detailing — item list
 
 .item-list {
   list-style: none;
   margin: 0;
-  padding: 22px 30px 28px;
+  padding: 22px 30px 8px;
 }
 
 .item-row {
@@ -201,7 +248,7 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
 }
 
 .card-footer-note {
-  margin: 0 30px 26px;
+  margin: 8px 30px 26px;
   padding: 14px 16px;
   border: 1px solid $hairline;
   border-radius: 4px;
@@ -218,6 +265,20 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
     height: 16px;
     color: $gold;
     flex-shrink: 0;
+  }
+}
+
+// Loading / error / empty states
+
+.state-message {
+  padding: 50px 24px;
+  text-align: center;
+  color: $ink-dim;
+  font-family: $font-ui;
+  font-size: 0.86rem;
+
+  &.error {
+    color: #e07a5f;
   }
 }
 

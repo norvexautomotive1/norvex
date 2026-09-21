@@ -1,24 +1,6 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { supabase } from '../lib/supabaseClient'
 import '../styles/Packages.scss'
-
-const vulcanizareItems = [
-  { name: 'Montaj / demontat roată', price: '20 lei' },
-  { name: 'Montaj / demontat anvelopă', price: '25 lei' },
-  { name: 'Echilibrat roată', price: '25 lei' },
-  { name: 'Pană / reparație anvelopă', price: '35 lei' },
-  { name: 'Valvă', price: '15 lei' },
-  { name: 'Schimb 4 roți + echilibrat', price: '105 lei' },
-  { name: 'Schimb anvelope + echilibrat', price: '165 lei' },
-]
-
-const detailingItems = [
-  { name: 'Interior simplu', price: '250 lei', note: 'Spălătorie tradițională, fără tapițerie' },
-  { name: 'Șamponare tapițerie', price: '350 lei' },
-  { name: 'Interior complet', price: '500 lei' },
-  { name: 'Polisare faruri', price: '250 lei' },
-  { name: 'Polish caroserie', price: 'PE DEVIZ', quote: true },
-  { name: 'Pachet complet', price: '990 lei', note: 'Interior + exterior + faruri' },
-]
 
 const VulcanizareIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
@@ -42,34 +24,71 @@ const InfoIcon = () => (
   </svg>
 )
 
-const ItemRow = ({ item }) => (
-  <li className={item.note ? 'item-note-wrap' : 'item-row'}>
-    {item.note ? (
+const formatPrice = (value) => (value === null || value === undefined ? '—' : `${value} lei`)
+
+const DetailingRow = ({ item }) => (
+  <li className={item.descriere ? 'item-note-wrap' : 'item-row'}>
+    {item.descriere ? (
       <>
         <div className="item-row item-row--tight">
-          <span className="item-name">{item.name}</span>
+          <span className="item-name">{item.nume_serviciu}</span>
           <span className="item-leader" />
-          <span className="item-price">{item.price}</span>
+          <span className={`item-price ${item.pe_deviz ? 'quote' : ''}`}>
+            {item.pe_deviz ? 'PE DEVIZ' : `${item.pret_fix} lei`}
+          </span>
         </div>
-        <span className="item-note">{item.note}</span>
+        <span className="item-note">{item.descriere}</span>
       </>
     ) : (
       <>
-        <span className="item-name">{item.name}</span>
+        <span className="item-name">{item.nume_serviciu}</span>
         <span className="item-leader" />
-        <span className={`item-price ${item.quote ? 'quote' : ''}`}>{item.price}</span>
+        <span className={`item-price ${item.pe_deviz ? 'quote' : ''}`}>
+          {item.pe_deviz ? 'PE DEVIZ' : `${item.pret_fix} lei`}
+        </span>
       </>
     )}
   </li>
 )
 
 const Packages = () => {
+  const [services, setServices] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
   const [activeIndex, setActiveIndex] = useState(0)
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
 
   const viewportRef = useRef(null)
   const startXRef = useRef(0)
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      setLoading(true)
+      setError('')
+
+      const { data, error: fetchError } = await supabase
+        .from('servicii_norvex')
+        .select('*')
+        .order('ordine', { ascending: true })
+        .order('created_at', { ascending: true })
+
+      if (fetchError) {
+        setError(fetchError.message)
+        setLoading(false)
+        return
+      }
+
+      setServices(data)
+      setLoading(false)
+    }
+
+    fetchServices()
+  }, [])
+
+  const vulcanizareItems = services.filter((s) => s.categorie === 'Vulcanizare')
+  const detailingItems = services.filter((s) => s.categorie === 'Detailing')
 
   const goTo = (index) => {
     setActiveIndex(index)
@@ -112,7 +131,7 @@ const Packages = () => {
   }
 
   return (
-    <section className="packages-section" id="packages-section"> 
+    <section className="packages-section" id="packages-section">
       <div className="eyebrow">Tarife</div>
       <h2>Pachetele noastre</h2>
       <p className="intro">
@@ -141,35 +160,69 @@ const Packages = () => {
           <span className={`tab-indicator ${activeIndex === 1 ? 'pos-1' : ''}`} />
         </div>
 
-        <div
-          className="slider-viewport"
-          ref={viewportRef}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div className="slider-track" style={trackStyle}>
-            <div className="panel">
-              <ul className="item-list">
-                {vulcanizareItems.map((item) => (
-                  <ItemRow key={item.name} item={item} />
-                ))}
-              </ul>
-            </div>
+        {loading && <div className="state-message">Se încarcă tarifele...</div>}
+        {!loading && error && (
+          <div className="state-message error">Nu am putut încărca tarifele.</div>
+        )}
 
-            <div className="panel">
-              <ul className="item-list">
-                {detailingItems.map((item) => (
-                  <ItemRow key={item.name} item={item} />
-                ))}
-              </ul>
-              <div className="card-footer-note">
-                <InfoIcon />
-                Exterior gratuit la rezervări de minimum 200 lei
+        {!loading && !error && (
+          <div
+            className="slider-viewport"
+            ref={viewportRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="slider-track" style={trackStyle}>
+              {/* Vulcanizare — table with 3 pricing tiers */}
+              <div className="panel">
+                {vulcanizareItems.length === 0 ? (
+                  <div className="state-message">Niciun tarif adăugat încă.</div>
+                ) : (
+                  <div className="price-table-wrap">
+                    <table className="price-table">
+                      <thead>
+                        <tr>
+                          <th>Serviciu</th>
+                          <th>Autoturism</th>
+                          <th>SUV</th>
+                          <th>Microbuz 8+1</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {vulcanizareItems.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.nume_serviciu}</td>
+                            <td>{formatPrice(item.pret_autoturism)}</td>
+                            <td>{formatPrice(item.pret_suv)}</td>
+                            <td>{formatPrice(item.pret_microbuz)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Detailing — flat price list */}
+              <div className="panel">
+                {detailingItems.length === 0 ? (
+                  <div className="state-message">Niciun tarif adăugat încă.</div>
+                ) : (
+                  <ul className="item-list">
+                    {detailingItems.map((item) => (
+                      <DetailingRow key={item.id} item={item} />
+                    ))}
+                  </ul>
+                )}
+                <div className="card-footer-note">
+                  <InfoIcon />
+                  Exterior gratuit la rezervări de minimum 200 lei
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="swipe-hint">← Glisează pentru a schimba →</div>
