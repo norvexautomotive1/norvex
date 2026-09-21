@@ -131,22 +131,41 @@ const Rezerve = () => {
 
     const pachetText = `${pachetSelectat.nume_serviciu} — ${pretAfisat}`
 
-    const { error } = await supabase.from('rezervari_norvex').insert([
-      {
-        nume,
-        prenume,
-        telefon,
-        email,
-        tip_masina: claseVehicul,
-        numar_masina: numarMasina,
-        categorie_serviciu: categorieServiciu,
-        pachet_selectat: pachetText,
-      },
-    ])
+    const { data: reservation, error } = await supabase
+      .from('rezervari_norvex')
+      .insert([
+        {
+          nume,
+          prenume,
+          telefon,
+          email,
+          tip_masina: claseVehicul,
+          numar_masina: numarMasina,
+          categorie_serviciu: categorieServiciu,
+          pachet_selectat: pachetText,
+        },
+      ])
+      .select('id')
+      .single()
 
     if (error) {
       setStatus('error')
       setErrorMessage(error.message)
+      return
+    }
+
+    const { error: confirmationError } = await supabase.functions.invoke(
+      'send-booking-confirmation',
+      {
+        body: { reservationId: reservation.id },
+      }
+    )
+
+    if (confirmationError) {
+      setStatus('error')
+      setErrorMessage(
+        'Rezervarea a fost salvată, dar emailul de confirmare nu a putut fi pregătit.'
+      )
       return
     }
 
