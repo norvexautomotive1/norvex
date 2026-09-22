@@ -146,7 +146,7 @@ Deno.serve(async (request) => {
   const { data: reservation, error: reservationError } = await supabaseAdmin
     .from("rezervari_norvex")
     .select(
-      "id, nume, prenume, tip_masina, numar_masina, categorie_serviciu, pachet_selectat, email, telefon, data_programare, ora_programare, confirmation_sent_at"
+      "id, nume, prenume, tip_masina, numar_masina, categorie_serviciu, pachet_selectat, email, telefon, data_programare, ora_programare"
     )
     .eq("id", reservationId)
     .maybeSingle();
@@ -161,14 +161,6 @@ Deno.serve(async (request) => {
   }
 
   console.log(`Reservation ${reservation.id}: processing acceptance email`);
-
-  if (reservation.confirmation_sent_at) {
-    console.log(`Reservation ${reservation.id}: acceptance email already sent`);
-    return jsonResponse(200, {
-      ok: true,
-      alreadySent: true,
-    });
-  }
 
   const email =
     typeof reservation.email === "string" ? reservation.email.trim() : "";
@@ -198,22 +190,8 @@ Deno.serve(async (request) => {
     data ? { emailId: data.id } : undefined,
   );
 
-  const { error: sentAtError } = await supabaseAdmin
-    .from("rezervari_norvex")
-    .update({ confirmation_sent_at: new Date().toISOString() })
-    .eq("id", reservation.id)
-    .is("confirmation_sent_at", null);
-
-  if (sentAtError) {
-    console.error("confirmation_sent_at update error:", sentAtError);
-    return jsonResponse(500, {
-      error: "Email accepted but reservation could not be updated",
-    });
-  }
-
   return jsonResponse(200, {
     ok: true,
-    alreadySent: false,
     emailId: data?.id ?? null,
   });
 });

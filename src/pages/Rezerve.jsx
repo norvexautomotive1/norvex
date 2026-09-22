@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import emailjs from '@emailjs/browser'
 import { supabase } from '../lib/supabaseClient'
 import '../styles/Rezerve.scss'
 
@@ -407,24 +408,21 @@ const Rezerve = () => {
 
     const pachetText = `${pachetSelectat.nume_serviciu} — ${pretAfisat}`
 
-    const { data: reservation, error } = await supabase
-      .from('rezervari_norvex')
-      .insert([
-        {
-          nume,
-          prenume,
-          telefon,
-          email,
-          tip_masina: claseVehicul,
-          numar_masina: numarMasina,
-          categorie_serviciu: categorieServiciu,
-          pachet_selectat: pachetText,
-          data_programare: dataProgramare,
-          ora_programare: oraProgramare,
-        },
-      ])
-      .select('id')
-      .single()
+    const { data: reservation, error } = await supabase.rpc(
+      'create_reservation',
+      {
+        p_nume: nume,
+        p_prenume: prenume,
+        p_telefon: telefon,
+        p_email: email,
+        p_tip_masina: claseVehicul,
+        p_numar_masina: numarMasina,
+        p_categorie_serviciu: categorieServiciu,
+        p_pachet_selectat: pachetText,
+        p_data_programare: dataProgramare,
+        p_ora_programare: oraProgramare,
+      }
+    )
 
     if (error) {
       setStatus('error')
@@ -434,19 +432,46 @@ const Rezerve = () => {
       return
     }
 
-    const { error: confirmationError } = await supabase.functions.invoke(
-      'send-booking-confirmation',
-      {
-        body: { reservationId: reservation.id },
-      }
-    )
+    if (!reservation?.id) {
+      setStatus('error')
+      setErrorMessage('Rezervarea a fost creată, dar ID-ul nu a fost returnat.')
+      return
+    }
 
-    if (confirmationError) {
+    const emailjsServiceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+    const emailjsTemplateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+    const emailjsPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+
+    if (!emailjsServiceId || !emailjsTemplateId || !emailjsPublicKey) {
+      setStatus('error')
+      setErrorMessage('EmailJS nu este configurat complet.')
+      setRefreshKey((k) => k + 1)
+      return
+    }
+
+    try {
+      await emailjs.send(
+        emailjsServiceId,
+        emailjsTemplateId,
+        {
+          to_email: email,
+          to_name: `${prenume} ${nume}`,
+          appointment_date: formatDataLunga(dataProgramare),
+          appointment_time: fmtOra(oraProgramare),
+          phone: telefon,
+          vehicle: claseVehicul,
+          plate: numarMasina,
+          category: categorieServiciu,
+          package_name: pachetText,
+        },
+        { publicKey: emailjsPublicKey }
+      )
+    } catch (emailError) {
+      console.error('EmailJS send error:', emailError)
       setStatus('error')
       setErrorMessage(
         'Rezervarea a fost salvată, dar emailul cu detaliile nu a putut fi trimis.'
       )
-      // Slotul e deja luat; reîncarcă orele ca să nu se poată rezerva a doua oară
       setRefreshKey((k) => k + 1)
       return
     }
@@ -681,4 +706,4 @@ const Rezerve = () => {
   )
 }
 
-export default Rezerve  
+export default Rezerve
