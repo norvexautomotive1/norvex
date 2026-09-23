@@ -1,0 +1,169 @@
+$admin-bg: #0a0906;
+$admin-panel: #11100c;
+$admin-ink: #f2ede3;
+$admin-dim: rgba(242, 237, 227, 0.66);
+$admin-gold: #c8a24d;
+$admin-line: rgba(200, 162, 77, 0.25);
+
+.admin-page {
+  min-height: 70vh;
+  padding: 90px 24px 120px;
+  background: $admin-bg;
+  color: $admin-ink;
+  font-family: 'Jost', 'Helvetica Neue', sans-serif;
+}
+
+.admin-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto 36px;
+
+  h1 {
+    margin: 12px 0 8px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: $admin-dim;
+  }
+}
+
+.admin-eyebrow {
+  color: $admin-gold;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.admin-refresh,
+.admin-state button,
+.admin-actions button {
+  border: 1px solid $admin-gold;
+  padding: 10px 15px;
+  background: transparent;
+  color: $admin-gold;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-state {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 44px;
+  border: 1px solid $admin-line;
+  background: $admin-panel;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 8px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  p {
+    color: $admin-dim;
+  }
+}
+
+.admin-error {
+  color: #e07a5f;
+}
+
+.reservations-table-wrap {
+  max-width: 1440px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border: 1px solid $admin-line;
+}
+
+.reservations-table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+  background: $admin-panel;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 16px;
+    border-bottom: 1px solid rgba(200, 162, 77, 0.12);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    color: $admin-gold;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  td {
+    color: $admin-dim;
+  }
+
+  td > span,
+  td > strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  strong {
+    color: $admin-ink;
+    font-weight: 500;
+  }
+
+  input {
+    display: block;
+    width: 150px;
+    margin-bottom: 7px;
+    border: 1px solid $admin-line;
+    padding: 7px 8px;
+    background: #0b0a07;
+    color: $admin-ink;
+    font: inherit;
+  }
+
+  small {
+    color: $admin-gold;
+  }
+}
+
+.admin-actions {
+  white-space: nowrap;
+
+  button {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.5;
+    }
+
+    &.danger {
+      border-color: #a85e4b;
+      color: #e07a5f;
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-page {
+    padding-inline: 16px;
+  }
+
+  .admin-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

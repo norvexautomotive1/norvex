@@ -81,13 +81,13 @@ const Contact = () => {
           </div>
           <div className="detail-block">
             <span className="detail-label">Program</span>
-            <span>Luni – Vineri, 08:00 – 18:00</span>
-            <span>Sâmbătă, 09:00 – 14:00</span>
+            <span>Luni – Sâmbătă, 09:00 – 19:00</span>
+            <span>Duminică, închis</span>
           </div>
           <div className="detail-block">
             <span className="detail-label">Locație</span>
             <span>Norvex Automotive</span>
-            <span>Adresa atelierului tău</span>
+            <span>Strada Principală Nr. 42, Cornu de Sus, Prahova</span>
           </div>
         </section>
 

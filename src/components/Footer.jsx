@@ -91,10 +91,10 @@ const Footer = () => {
         <div className="footer-col">
           <h4>Contact</h4>
           <ul>
-            <li><span>Strada Exemplu 123, Oraș</span></li>
+            <li><span>Strada Principală Nr. 42, Cornu de Sus, Prahova</span></li>
             <li><a href="tel:+40700000000">+40 700 000 000</a></li>
-            <li><a href="mailto:info@norvexautomotives.com">info@norvexautomotives.com</a></li>
-            <li><span>Luni – Sâmbătă, 08:00 – 18:00</span></li>
+            <li><a href="mailto:norvexautomotive1@gmail.com">norvexautomotive1@gmail.com</a></li>
+            <li><span>Luni – Sâmbătă, 09:00 – 19:00 · Duminică închis</span></li>
           </ul>
         </div>
       </div>

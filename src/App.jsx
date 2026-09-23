@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Rezerve from './pages/Rezerve'
 import Contact from './pages/Contact'
 import About from './pages/About'
 import Footer from './components/Footer'
+import AdminRezervari from './pages/AdminRezervari'
+
+const ScrollToTop = () => {
+  const { pathname, search } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [pathname, search])
+
+  return null
+}
 
 const App = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -35,6 +46,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div className="app-shell">
         <Navbar />
 
@@ -44,6 +56,7 @@ const App = () => {
             <Route path="/rezerve" element={<Rezerve />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
+            <Route path="/admin/rezervari" element={<AdminRezervari />} />
           </Routes>
         </main>
 
