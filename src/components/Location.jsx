@@ -1,4 +1,5 @@
 import '../styles/Location.scss'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 
 const NORVEX_ADDRESS =
   'Strada Principala Nr 42, Cornu de Sus, Prahova, Romania'
@@ -6,7 +7,8 @@ const NORVEX_MAP_EMBED_URL =
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1103.252658229308!2d26.25120579814788!3d44.84108056316571!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b22f0062fab597%3A0x143c5f4af68d8fac!2sNorvex%20Automotive!5e1!3m2!1sro!2sro!4v1790169867918!5m2!1sro!2sro'
 
 const Location = () => {
-  const mapsQuery = import.meta.env.VITE_GOOGLE_MAPS_QUERY || NORVEX_ADDRESS
+  const settings = useSiteSettings()
+  const mapsQuery = settings.address || import.meta.env.VITE_GOOGLE_MAPS_QUERY || NORVEX_ADDRESS
   const mapsEmbedUrl =
     import.meta.env.VITE_GOOGLE_MAPS_EMBED_URL || NORVEX_MAP_EMBED_URL
   const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -41,15 +43,12 @@ const Location = () => {
             <div className="location-meta">
               <div>
                 <span>Program</span>
-                <strong>Luni – Sâmbătă · 09:00 – 19:00</strong>
-                <strong>Duminică · Închis</strong>
+                <strong>{settings.opening_hours}</strong>
               </div>
               <div>
                 <span>Contact</span>
-                <a href="tel:+40700000000">+40 700 000 000</a>
-                <a href="mailto:norvexautomotive1@gmail.com">
-                  norvexautomotive1@gmail.com
-                </a>
+                <a href={`tel:${settings.phone_primary}`}>{settings.phone_primary}</a>
+                <a href={`mailto:${settings.email_primary}`}>{settings.email_primary}</a>
               </div>
             </div>
 

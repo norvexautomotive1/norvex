@@ -1,5 +1,6 @@
 import React from 'react'
 import '../styles/Footer.scss'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 
 const InstagramIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -23,6 +24,7 @@ const FacebookIcon = () => (
 
 const Footer = () => {
   const year = new Date().getFullYear()
+  const settings = useSiteSettings()
 
   return (
     <footer className="footer">
@@ -47,33 +49,39 @@ const Footer = () => {
           </p>
 
           <div className="social-row">
-            <a
-              href="https://instagram.com/norvexautomotives"
-              className="social-icon"
-              aria-label="Instagram"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <InstagramIcon />
-            </a>
-            <a
-              href="https://tiktok.com/@norvexautomotives"
-              className="social-icon"
-              aria-label="TikTok"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <TikTokIcon />
-            </a>
-            <a
-              href="https://facebook.com/norvexautomotives"
-              className="social-icon"
-              aria-label="Facebook"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <FacebookIcon />
-            </a>
+            {settings.instagram_url && (
+              <a
+                href={settings.instagram_url}
+                className="social-icon"
+                aria-label="Instagram"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <InstagramIcon />
+              </a>
+            )}
+            {settings.tiktok_url && (
+              <a
+                href={settings.tiktok_url}
+                className="social-icon"
+                aria-label="TikTok"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <TikTokIcon />
+              </a>
+            )}
+            {settings.facebook_url && (
+              <a
+                href={settings.facebook_url}
+                className="social-icon"
+                aria-label="Facebook"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FacebookIcon />
+              </a>
+            )}
           </div>
         </div>
 
@@ -91,10 +99,10 @@ const Footer = () => {
         <div className="footer-col">
           <h4>Contact</h4>
           <ul>
-            <li><span>Strada Principală Nr. 42, Cornu de Sus, Prahova</span></li>
-            <li><a href="tel:+40700000000">+40 700 000 000</a></li>
-            <li><a href="mailto:norvexautomotive1@gmail.com">norvexautomotive1@gmail.com</a></li>
-            <li><span>Luni – Sâmbătă, 09:00 – 19:00 · Duminică închis</span></li>
+            <li><span>{settings.address}</span></li>
+            <li><a href={`tel:${settings.phone_primary}`}>{settings.phone_primary}</a></li>
+            <li><a href={`mailto:${settings.email_primary}`}>{settings.email_primary}</a></li>
+            <li><span>{settings.opening_hours}</span></li>
           </ul>
         </div>
       </div>

@@ -199,6 +199,68 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
     transform: translateX(0);
   }
 
+  .mobile-social {
+    margin: auto 24px 0;
+    padding: 22px 16px 8px;
+    border-top: 1px solid rgba(200, 162, 77, 0.26);
+    background: linear-gradient(145deg, rgba(200, 162, 77, 0.09), rgba(200, 162, 77, 0.02));
+    border-radius: 18px;
+  }
+
+  .mobile-social-label {
+    display: block;
+    margin-bottom: 14px;
+    color: rgba(242, 237, 227, 0.56);
+    font-family: $font-ui;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .mobile-social-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .mobile-social-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid rgba(200, 162, 77, 0.34);
+    border-radius: 50%;
+    background: rgba(10, 9, 6, 0.62);
+    color: $gold-bright;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    transition: transform 0.25s ease, color 0.25s ease, border-color 0.25s ease,
+      background 0.25s ease, box-shadow 0.25s ease;
+    animation: mobile-social-enter 0.45s ease both;
+
+    &:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.16s;
+    }
+
+    &:hover,
+    &:focus-visible {
+      transform: translateY(-3px);
+      border-color: $gold-bright;
+      background: rgba(200, 162, 77, 0.16);
+      color: #fff4d0;
+      box-shadow: 0 10px 24px rgba(200, 162, 77, 0.2);
+      outline: none;
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
   .drawer-header {
     display: flex;
     align-items: center;
@@ -245,7 +307,7 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
         
     }
     a:hover{
-        border-bottom: 1px solid $gold_bright;
+        border-bottom: 1px solid $gold-bright;
         transition: all 1.2s ;
     }
   }
@@ -259,6 +321,18 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
         transition-delay: 0.07s + ($i * 0.05s);
       }
     }
+  }
+}
+
+@keyframes mobile-social-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

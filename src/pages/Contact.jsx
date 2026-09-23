@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 import '../styles/Contact.scss'
 
 const Contact = () => {
@@ -15,6 +16,7 @@ const Contact = () => {
   })
   const [status, setStatus] = useState('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const settings = useSiteSettings()
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }))
@@ -71,23 +73,20 @@ const Contact = () => {
         <section className="contact-details">
           <div className="detail-block">
             <span className="detail-label">Telefon</span>
-            <a href="tel:+40700000000">+40 700 000 000</a>
+            <a href={`tel:${settings.phone_primary}`}>{settings.phone_primary}</a>
           </div>
           <div className="detail-block">
             <span className="detail-label">Email</span>
-            <a href="mailto:norvexautomotive1@gmail.com">
-              norvexautomotive1@gmail.com
-            </a>
+            <a href={`mailto:${settings.email_primary}`}>{settings.email_primary}</a>
           </div>
           <div className="detail-block">
             <span className="detail-label">Program</span>
-            <span>Luni – Sâmbătă, 09:00 – 19:00</span>
-            <span>Duminică, închis</span>
+            <span>{settings.opening_hours}</span>
           </div>
           <div className="detail-block">
             <span className="detail-label">Locație</span>
             <span>Norvex Automotive</span>
-            <span>Strada Principală Nr. 42, Cornu de Sus, Prahova</span>
+            <span>{settings.address}</span>
           </div>
         </section>
 

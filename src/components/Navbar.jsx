@@ -1,9 +1,31 @@
 import React, { useState } from 'react'
 import '../styles/Navbar.scss'
 import { NavLink } from 'react-router-dom'
+import { useSiteSettings } from '../hooks/useSiteSettings'
+
+const InstagramIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+  </svg>
+)
+
+const TikTokIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M14.5 3c.3 1.9 1.6 3.4 3.5 3.7v2.6c-1.3 0-2.5-.4-3.5-1.1v5.9a5 5 0 1 1-5-5c.2 0 .4 0 .6.1v2.7a2.3 2.3 0 1 0 1.9 2.3V3h2.5z" />
+  </svg>
+)
+
+const FacebookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+    <path d="M15 8.5h-2A1.5 1.5 0 0 0 11.5 10v2H15l-.5 3h-3V21h-3v-6H6v-3h2.5v-2.3C8.5 7 10 5.5 12.5 5.5H15v3z" />
+  </svg>
+)
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
+  const settings = useSiteSettings()
 
   const navItems = [
     { to: '/', label: 'Casa' },
@@ -95,6 +117,29 @@ const Navbar = () => {
               {item.label}
             </NavLink>
           ))}
+        </div>
+        <div className="mobile-social">
+          <span className="mobile-social-label">Urmărește-ne</span>
+          <div className="mobile-social-row">
+          {[
+            ['instagram_url', 'Instagram', <InstagramIcon key="instagram" />],
+            ['tiktok_url', 'TikTok', <TikTokIcon key="tiktok" />],
+            ['facebook_url', 'Facebook', <FacebookIcon key="facebook" />],
+          ].map(([key, label, icon]) => (
+            settings[key] ? (
+              <a
+                key={key}
+                href={settings[key]}
+                className="mobile-social-icon"
+                aria-label={label}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {icon}
+              </a>
+            ) : null
+          ))}
+          </div>
         </div>
       </aside>
     </header>
