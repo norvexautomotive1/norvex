@@ -33,6 +33,28 @@ const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 const isoDow = (d) => (d.getDay() === 0 ? 7 : d.getDay())
 const fmtOra = (t) => t.slice(0, 5)
 
+const getEmailClientUrl = (emailAddress) => {
+  const domain = emailAddress.split('@')[1]?.toLowerCase()
+
+  if (domain === 'gmail.com' || domain === 'googlemail.com') {
+    return 'https://mail.google.com/mail/u/0/#inbox'
+  }
+
+  if (domain === 'outlook.com' || domain === 'hotmail.com' || domain === 'live.com') {
+    return 'https://outlook.live.com/mail/0/inbox'
+  }
+
+  if (domain === 'yahoo.com' || domain === 'yahoo.ro') {
+    return 'https://mail.yahoo.com/'
+  }
+
+  if (domain === 'icloud.com' || domain === 'me.com' || domain === 'mac.com') {
+    return 'https://www.icloud.com/mail'
+  }
+
+  return `mailto:${emailAddress}`
+}
+
 const formatDataLunga = (iso) => {
   const [y, m, d] = iso.split('-').map(Number)
   const date = new Date(y, m - 1, d)
@@ -276,6 +298,7 @@ const Rezerve = () => {
   const [status, setStatus] = useState('idle') // idle | loading | success | error
   const [errorMessage, setErrorMessage] = useState('')
   const [successText, setSuccessText] = useState('')
+  const [successEmail, setSuccessEmail] = useState('')
 
   // Servicii + program + zile închise + capacitate, într-un singur val
   useEffect(() => {
@@ -478,6 +501,7 @@ const Rezerve = () => {
 
     setStatus('success')
     setSuccessText(programareText)
+    setSuccessEmail(email)
     setNume('')
     setPrenume('')
     setTelefon('')
@@ -702,6 +726,54 @@ const Rezerve = () => {
           </form>
         )}
       </div>
+
+      {status === 'success' && (
+        <div className="success-modal-backdrop" role="presentation">
+          <div
+            className="success-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reservation-success-title"
+          >
+            <button
+              type="button"
+              className="success-modal-close"
+              aria-label="Închide confirmarea"
+              onClick={() => setStatus('idle')}
+            >
+              ×
+            </button>
+
+            <div className="success-modal-icon">
+              <CheckIcon />
+            </div>
+            <span className="success-modal-eyebrow">Totul este pregătit</span>
+            <h2 id="reservation-success-title">Rezervarea a fost confirmată</h2>
+            <p>
+              Programarea ta este înregistrată pentru <strong>{successText}</strong>.
+              Ți-am trimis toate detaliile pe emailul <strong>{successEmail}</strong>.
+            </p>
+
+            <div className="success-modal-actions">
+              <a
+                className="success-modal-email"
+                href={getEmailClientUrl(successEmail)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Deschide emailul
+              </a>
+              <button
+                type="button"
+                className="success-modal-secondary"
+                onClick={() => setStatus('idle')}
+              >
+                Închide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

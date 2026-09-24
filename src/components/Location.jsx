@@ -38,7 +38,13 @@ const Location = () => {
 
             <span className="location-label">Norvex Automotive</span>
             <h3>Service auto cu atenție la detalii</h3>
-            <p className="location-address">{mapsQuery}</p>
+            <p className="location-address">
+              <svg className="pin-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 10.4c0 5.3-8 11.1-8 11.1S4 15.7 4 10.4a8 8 0 1 1 16 0Z" />
+                <circle cx="12" cy="10.2" r="2.5" />
+              </svg>
+              <span>{mapsQuery}</span>
+            </p>
 
             <div className="location-meta">
               <div>
@@ -47,8 +53,19 @@ const Location = () => {
               </div>
               <div>
                 <span>Contact</span>
-                <a href={`tel:${settings.phone_primary}`}>{settings.phone_primary}</a>
-                <a href={`mailto:${settings.email_primary}`}>{settings.email_primary}</a>
+                <a className="meta-link" href={`tel:${settings.phone_primary}`}>
+                  <svg className="meta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+                  </svg>
+                  {settings.phone_primary}
+                </a>
+                <a className="meta-link" href={`mailto:${settings.email_primary}`}>
+                  <svg className="meta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="1.5" />
+                    <path d="m4 7 8 6 8-6" />
+                  </svg>
+                  {settings.email_primary}
+                </a>
               </div>
             </div>
 

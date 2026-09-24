@@ -546,6 +546,187 @@ $font-ui: 'Jost', 'Helvetica Neue', sans-serif;
   }
 }
 
+.success-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+  animation: success-backdrop-in 0.25s ease both;
+}
+
+.success-modal {
+  position: relative;
+  width: min(100%, 500px);
+  padding: 46px 40px 38px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(200, 162, 77, 0.15), transparent 42%),
+    linear-gradient(165deg, #151208 0%, $panel 100%);
+  border: 1px solid rgba(226, 191, 111, 0.44);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 45px rgba(200, 162, 77, 0.1);
+  animation: success-modal-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  h2 {
+    margin: 14px 0 12px;
+    color: $ink;
+    font-family: $font-display;
+    font-size: clamp(2rem, 7vw, 2.7rem);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  p {
+    margin: 0 auto;
+    max-width: 390px;
+    color: $ink-dim;
+    font-family: $font-ui;
+    font-size: 0.88rem;
+    line-height: 1.7;
+
+    strong {
+      color: $gold-bright;
+      font-weight: 600;
+    }
+  }
+}
+
+.success-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(200, 162, 77, 0.24);
+  border-radius: 50%;
+  background: transparent;
+  color: $ink-dim;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $gold;
+    background: rgba(200, 162, 77, 0.1);
+    color: $gold-bright;
+    outline: none;
+  }
+}
+
+.success-modal-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto;
+  border: 1px solid rgba(226, 191, 111, 0.6);
+  border-radius: 50%;
+  background: rgba(200, 162, 77, 0.12);
+  color: $gold-bright;
+  box-shadow: 0 0 0 8px rgba(200, 162, 77, 0.05), 0 0 28px rgba(200, 162, 77, 0.16);
+
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.success-modal-eyebrow {
+  display: block;
+  margin-top: 20px;
+  color: $gold;
+  font-family: $font-ui;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.success-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.success-modal-email,
+.success-modal-secondary {
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: 3px;
+  font-family: $font-ui;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.success-modal-email {
+  border: 1px solid $gold;
+  background: $gold;
+  color: $bg;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    background: $gold-bright;
+    outline: none;
+  }
+}
+
+.success-modal-secondary {
+  border: 1px solid $hairline;
+  background: transparent;
+  color: $ink-dim;
+
+  &:hover,
+  &:focus-visible {
+    border-color: $gold;
+    color: $gold-bright;
+    outline: none;
+  }
+}
+
+@keyframes success-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes success-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .success-modal {
+    padding: 40px 22px 26px;
+  }
+
+  .success-modal-actions {
+    flex-direction: column;
+  }
+
+  .success-modal-email,
+  .success-modal-secondary {
+    width: 100%;
+  }
+}
+
 @media (max-width: 560px) {
   .form-card {
     padding: 32px 22px;
